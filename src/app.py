@@ -105,3 +105,29 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.delete("/activities/{activity_name}/unregister")
+def unregister_from_activity(activity_name: str, email: str):
+    """Unregister a student from an activity"""
+    # Debug: afficher l'état avant
+    print(f"[DEBUG] Tentative de désinscription: {email} de {activity_name}")
+    if activity_name not in activities:
+        print(f"[DEBUG] Activité non trouvée: {activity_name}")
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activity = activities[activity_name]
+    print(f"[DEBUG] Participants actuels: {activity['participants']}")
+
+    # Vérification stricte et debug
+    if email not in activity["participants"]:
+        print(f"[DEBUG] Email non trouvé dans participants: {email}")
+        print(f"[DEBUG] Liste brute: {activity['participants']}")
+        print(f"[DEBUG] Comparaison détaillée:")
+        for p in activity["participants"]:
+            print(f"  - '{p}' == '{email}' ? {p == email}")
+        raise HTTPException(status_code=404, detail="Student not registered for this activity")
+
+    activity["participants"].remove(email)
+    print(f"[DEBUG] Après suppression: {activity['participants']}")
+    return {"message": f"{email} has been unregistered from {activity_name}"}
